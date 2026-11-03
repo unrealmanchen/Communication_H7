@@ -1,0 +1,312 @@
+<html>
+<body>
+<pre>
+<h1>�Vision Build Log</h1>
+<h2>Tool Versions:</h2>
+IDE-Version: ��Vision V5.35.0.0
+Copyright (C) 2021 ARM Ltd and ARM Germany GmbH. All rights reserved.
+License Information: 2 2, 2, LIC=GMZI6-DU6J4-452T5-GBR8I-Q96MQ-6PG0H
+ 
+Tool Versions:
+Toolchain:       MDK-ARM Plus  Version: 5.35.0.2
+Toolchain Path:  C:\Keil_v5\ARM\ARMCC\Bin
+C Compiler:      Armcc.exe V5.06 update 7 (build 960)
+Assembler:       Armasm.exe V5.06 update 7 (build 960)
+Linker/Locator:  ArmLink.exe V5.06 update 7 (build 960)
+Library Manager: ArmAr.exe V5.06 update 7 (build 960)
+Hex Converter:   FromElf.exe V5.06 update 7 (build 960)
+CPU DLL:         SARMCM3.DLL V5.35.0.2
+Dialog DLL:      DCM.DLL V1.17.3.0
+Target DLL:      STLink\ST-LINKIII-KEIL_SWO.dll V3.0.9.0
+Dialog DLL:      TCM.DLL V1.53.0.0
+ 
+<h2>Project:</h2>
+D:\Code\RM\Communication_H7\MDK-ARM\Communication_H7.uvprojx
+Project File Date:  03/19/2026
+
+<h2>Output:</h2>
+*** Using Compiler 'V5.06 update 7 (build 960)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
+Rebuild target 'Communication_H7'
+assembling startup_stm32h743xx.s...
+startup_stm32h743xx.s(51): warning: A1581W: Added 1 bytes of padding at address 0xffff
+compiling stm32h7xx_hal_i2c_ex.c...
+compiling stm32h7xx_hal_msp.c...
+compiling dma.c...
+compiling stm32h7xx_hal_cortex.c...
+compiling stm32h7xx_hal_flash.c...
+compiling stm32h7xx_hal_pwr.c...
+compiling stm32h7xx_hal_hsem.c...
+compiling fdcan.c...
+compiling tim.c...
+compiling gpio.c...
+compiling stm32h7xx_hal_gpio.c...
+compiling usart.c...
+compiling stm32h7xx_hal_mdma.c...
+compiling stm32h7xx_hal.c...
+compiling stm32h7xx_it.c...
+compiling stm32h7xx_hal_flash_ex.c...
+compiling freertos.c...
+compiling main.c...
+../task/INIT.h(7): warning:  #1295-D: Deprecated declaration INIT - give arg types
+  void INIT();
+../task/INIT.h(8): warning:  #1-D: last line of file ends without a newline
+  #endif //COMMUNICATION_H7_INIT_H
+../Core/Src/main.c: 2 warnings, 0 errors
+compiling stm32h7xx_hal_pwr_ex.c...
+compiling stm32h7xx_hal_dma_ex.c...
+compiling stm32h7xx_hal_i2c.c...
+compiling stm32h7xx_hal_rcc.c...
+compiling stm32h7xx_hal_rcc_ex.c...
+compiling stm32h7xx_hal_dma.c...
+compiling croutine.c...
+compiling event_groups.c...
+compiling list.c...
+compiling queue.c...
+compiling stream_buffer.c...
+compiling tasks.c...
+compiling timers.c...
+compiling heap_4.c...
+compiling cmsis_os.c...
+compiling stm32h7xx_hal_exti.c...
+compiling port.c...
+compiling crc.c...
+compiling online.c...
+compiling can_callback.c...
+..\bsp\can_callback.c(89): warning:  #1-D: last line of file ends without a newline
+  } */
+..\bsp\can_callback.c: 1 warning, 0 errors
+compiling led_task.c...
+compiling stm32h7xx_hal_fdcan.c...
+compiling system_stm32h7xx.c...
+compiling stm32h7xx_hal_uart_ex.c...
+compiling stm32h7xx_hal_tim_ex.c...
+compiling bsp_timer.c...
+..\bsp\bsp_timer.c(45): warning:  #1-D: last line of file ends without a newline
+  }
+..\bsp\bsp_timer.c: 1 warning, 0 errors
+compiling stm32h7xx_hal_uart.c...
+compiling bsp_led.c...
+compiling bsp_can.c...
+..\bsp\bsp_can.c(59): warning:  #177-D: variable "a"  was declared but never referenced
+      int a=0;
+..\bsp\bsp_can.c: 1 warning, 0 errors
+compiling main_thread.c...
+..\app\user_lib.h(65): warning:  #47-D: incompatible redefinition of macro "SET_BIT"  (declared at line 207 of "../Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h")
+  #define SET_BIT(x, n)       ((x) |=  (1U << (n)))
+..\app\user_lib.h(68): warning:  #47-D: incompatible redefinition of macro "CLEAR_BIT"  (declared at line 209 of "../Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h")
+  #define CLEAR_BIT(x, n)     ((x) &= ~(1U << (n)))
+..\app\main_thread.c(44): warning:  #177-D: variable "msg_type"  was declared but never referenced
+      uint8_t msg_type, msg_index;
+..\app\main_thread.c(44): warning:  #177-D: variable "msg_index"  was declared but never referenced
+      uint8_t msg_type, msg_index;
+..\app\main_thread.c(87): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "uint8_t *"
+      CMD_PackPacket(&input,1,0x107,data);
+..\app\main_thread.c(89): warning:  #167-D: argument of type "char" is incompatible with parameter of type "void *"
+      memset(input,0,10);
+..\app\main_thread.c(90): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "uint8_t *"
+      CMD_PackPacket(&input,1,0x607,data);
+..\app\main_thread.c: 7 warnings, 0 errors
+compiling INIT.c...
+..\task\INIT.h(7): warning:  #1295-D: Deprecated declaration INIT - give arg types
+  void INIT();
+..\task\INIT.h(8): warning:  #1-D: last line of file ends without a newline
+  #endif //COMMUNICATION_H7_INIT_H
+../terminal/terminal.h(22): warning:  #1-D: last line of file ends without a newline
+  #endif //COMMUNICATION_H7_TEMINAL_H
+..\task\INIT.c(21): warning:  #1-D: last line of file ends without a newline
+  }
+..\task\INIT.c: 4 warnings, 0 errors
+compiling command_rec.c...
+..\app\user_lib.h(65): warning:  #47-D: incompatible redefinition of macro "SET_BIT"  (declared at line 207 of "../Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h")
+  #define SET_BIT(x, n)       ((x) |=  (1U << (n)))
+..\app\user_lib.h(68): warning:  #47-D: incompatible redefinition of macro "CLEAR_BIT"  (declared at line 209 of "../Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h")
+  #define CLEAR_BIT(x, n)     ((x) &= ~(1U << (n)))
+..\app\command_rec.c(32): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "uint8_t *"
+  			if (!Verify_CRC8_Check_Sum(rx_data, 5))
+..\app\command_rec.c(38): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "uint8_t *"
+  				if (!Verify_CRC16_Check_Sum(rx_data, data_length + 9))
+..\app\command_rec.c(42): warning:  #144-D: a value of type "char *" cannot be used to initialize an entity of type "uint8_t *"
+  			uint8_t *data = &rx_data[7];
+..\app\command_rec.c(51): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *"
+  					CMD_PackPacket(data, 13, 0x103, data_buffer);
+..\app\command_rec.c(51): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "uint8_t *"
+  					CMD_PackPacket(data, 13, 0x103, data_buffer);
+..\app\command_rec.c(61): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "uint8_t *"
+  					CMD_PackPacket(data_out, 13, 0x104, data_buffer);
+..\app\command_rec.c(66): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "uint8_t *"
+  					CMD_PackPacket(data_out, 13, 0x601, data_buffer);
+..\app\command_rec.c(74): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "uint8_t *"
+  					CMD_PackPacket(data_out, 1, 0x604, data_buffer);
+..\app\command_rec.c(82): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "uint8_t *"
+  					CMD_PackPacket(data_out, 1, 0x605, data_buffer);
+..\app\command_rec.c(88): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "uint8_t *"
+  					CMD_PackPacket(data_out, 1, 0x109, data_buffer);
+..\app\command_rec.c(94): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "uint8_t *"
+  					CMD_PackPacket(data_out, 13, 0x105, data_buffer);
+..\app\command_rec.c(101): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "uint8_t *"
+  					CMD_PackPacket(data_out, 4, 0x20D, data_buffer);
+..\app\command_rec.c(146): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *"
+  					CMD_PackPacket(data, 13, 0x101, data_buffer);
+..\app\command_rec.c(146): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "uint8_t *"
+  					CMD_PackPacket(data, 13, 0x101, data_buffer);
+..\app\command_rec.c(157): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "uint8_t *"
+  					CMD_PackPacket(data_out, 13, 0x601, data_buffer);
+..\app\command_rec.c(167): warning:  #117-D: non-void function "upc_decode"  should return a value
+  				return;
+..\app\command_rec.c(170): warning:  #940-D: missing return statement at end of non-void function "upc_decode" 
+  }
+..\app\command_rec.c: 19 warnings, 0 errors
+compiling user_lib.c...
+..\app\user_lib.h(65): warning:  #47-D: incompatible redefinition of macro "SET_BIT"  (declared at line 207 of "../Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h")
+  #define SET_BIT(x, n)       ((x) |=  (1U << (n)))
+..\app\user_lib.h(68): warning:  #47-D: incompatible redefinition of macro "CLEAR_BIT"  (declared at line 209 of "../Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h")
+  #define CLEAR_BIT(x, n)     ((x) &= ~(1U << (n)))
+..\app\user_lib.c(80): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "uint8_t *"
+      CMD_PackPacket(data_in,data_len,cmd_id,CMD_Tx_data_temp);
+..\app\user_lib.c: 3 warnings, 0 errors
+compiling hdware_init.c...
+compiling imu_interface.c...
+..\app\user_lib.h(65): warning:  #47-D: incompatible redefinition of macro "SET_BIT"  (declared at line 207 of "../Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h")
+  #define SET_BIT(x, n)       ((x) |=  (1U << (n)))
+..\app\user_lib.h(68): warning:  #47-D: incompatible redefinition of macro "CLEAR_BIT"  (declared at line 209 of "../Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h")
+  #define CLEAR_BIT(x, n)     ((x) &= ~(1U << (n)))
+..\app\imu_interface.c(30): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "const uint8_t *"
+  			crc16_update(&crc, &data[i], 4);
+..\app\imu_interface.c(31): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "const uint8_t *"
+  			crc16_update(&crc, &data[i] + 6, payload_len); 
+..\app\imu_interface.c(72): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *"
+      CMD_PackPacket(Tx_data,13,0x102,data1);
+..\app\imu_interface.c(72): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "uint8_t *"
+      CMD_PackPacket(Tx_data,13,0x102,data1);
+..\app\imu_interface.c: 6 warnings, 0 errors
+compiling terminal.c...
+..\terminal\terminal.h(22): warning:  #1-D: last line of file ends without a newline
+  #endif //COMMUNICATION_H7_TEMINAL_H
+..\terminal\terminal.c(46): warning:  #117-D: non-void function "debug"  should return a value
+          return;
+..\terminal\terminal.c(54): warning:  #117-D: non-void function "debug"  should return a value
+          return;
+..\terminal\terminal.c(61): warning:  #117-D: non-void function "debug"  should return a value
+      return;
+..\terminal\terminal.c(69): warning:  #117-D: non-void function "exit_a"  should return a value
+          return;
+..\terminal\terminal.c(77): warning:  #117-D: non-void function "exit_a"  should return a value
+          return;
+..\terminal\terminal.c(80): warning:  #117-D: non-void function "exit_a"  should return a value
+      return;
+..\terminal\terminal.c(93): warning:  #940-D: missing return statement at end of non-void function "help" 
+  }
+..\terminal\terminal.c(123): warning:  #940-D: missing return statement at end of non-void function "led" 
+  }
+..\terminal\terminal.c(97): warning:  #177-D: variable "times"  was declared but never referenced
+      int times = 0;
+..\terminal\terminal.c(207): warning:  #144-D: a value of type "void (*)(void *)" cannot be used to initialize an entity of type "os_pthread"
+      osThreadDef(Terminal_Task, TerminalTask, osPriorityLow, 0, 128);
+..\terminal\terminal.c(290): warning:  #870-D: invalid multibyte character sequence
+          UART_Tx(&UART_1, "任务�?       任务状�?     优先�?     剩余�?     任务序号\r\n",
+..\terminal\terminal.c(290): warning:  #870-D: invalid multibyte character sequence
+          UART_Tx(&UART_1, "任务�?       任务状�?     优先�?     剩余�?     任务序号\r\n",
+..\terminal\terminal.c(290): warning:  #870-D: invalid multibyte character sequence
+          UART_Tx(&UART_1, "任务�?       任务状�?     优先�?     剩余�?     任务序号\r\n",
+..\terminal\terminal.c(290): warning:  #870-D: invalid multibyte character sequence
+          UART_Tx(&UART_1, "任务�?       任务状�?     优先�?     剩余�?     任务序号\r\n",
+..\terminal\terminal.c(291): warning:  #870-D: invalid multibyte character sequence
+                  strlen("任务�?       任务状�?     优先�?     剩余�?     任务序号\r\n"));
+..\terminal\terminal.c(291): warning:  #870-D: invalid multibyte character sequence
+                  strlen("任务�?       任务状�?     优先�?     剩余�?     任务序号\r\n"));
+..\terminal\terminal.c(291): warning:  #870-D: invalid multibyte character sequence
+                  strlen("任务�?       任务状�?     优先�?     剩余�?     任务序号\r\n"));
+..\terminal\terminal.c(291): warning:  #870-D: invalid multibyte character sequence
+                  strlen("任务�?       任务状�?     优先�?     剩余�?     任务序号\r\n"));
+..\terminal\terminal.c(297): warning:  #870-D: invalid multibyte character sequence
+          UART_Tx(&UART_1, "任务�?         运行计数     使用�? \r\n",
+..\terminal\terminal.c(297): warning:  #870-D: invalid multibyte character sequence
+          UART_Tx(&UART_1, "任务�?         运行计数     使用�? \r\n",
+..\terminal\terminal.c(298): warning:  #870-D: invalid multibyte character sequence
+                  strlen("任务�?         运行计数     使用�? \r\n"));
+..\terminal\terminal.c(298): warning:  #870-D: invalid multibyte character sequence
+                  strlen("任务�?         运行计数     使用�? \r\n"));
+..\terminal\terminal.c(188): warning:  #550-D: variable "cursor_state"  was set but never used
+  static cursor_state_t cursor_state = CURSOR_ON;
+..\terminal\terminal.c(189): warning:  #177-D: variable "cursor_blink_enabled"  was declared but never referenced
+  static uint8_t cursor_blink_enabled = 1;
+..\terminal\terminal.c: 25 warnings, 0 errors
+compiling bsp_uart.c...
+../terminal/terminal.h(22): warning:  #1-D: last line of file ends without a newline
+  #endif //COMMUNICATION_H7_TEMINAL_H
+../app/referee.h(382): warning:  #1-D: last line of file ends without a newline
+  #endif //COMMUNICATION_H7_REFEREE_H
+..\bsp\bsp_uart.c(92): warning:  #144-D: a value of type "int (*)(char *, int)" cannot be used to initialize an entity of type "void (*)(char *, int)"
+      .function = upc_decode,
+..\bsp\bsp_uart.c(116): warning:  #144-D: a value of type "int (*)(char *, int)" cannot be used to initialize an entity of type "void (*)(char *, int)"
+      .function = upc_decode,
+..\bsp\bsp_uart.c(128): warning:  #144-D: a value of type "uint8_t (*)(uint8_t *, int)" cannot be used to initialize an entity of type "void (*)(char *, int)"
+      .function = Referee_data_decode,
+..\bsp\bsp_uart.c(140): warning:  #144-D: a value of type "int (*)(char *, int)" cannot be used to initialize an entity of type "void (*)(char *, int)"
+      .function = upc_decode,
+..\bsp\bsp_uart.c(352): warning:  #167-D: argument of type "UART_HandleTypeDef **" is incompatible with parameter of type "UART_HandleTypeDef *"
+          HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(&uart_hdl.huart, data, len);
+..\bsp\bsp_uart.c(39): warning:  #177-D: function "UART_2_TxTask"  was declared but never referenced
+  static void UART_2_TxTask(const void *arg);
+..\bsp\bsp_uart.c(338): warning:  #177-D: function "UART_TxTask"  was declared but never referenced
+  static void UART_TxTask(const void *arg){
+..\bsp\bsp_uart.c: 9 warnings, 0 errors
+compiling referee.c...
+..\app\referee.h(382): warning:  #1-D: last line of file ends without a newline
+  #endif //COMMUNICATION_H7_REFEREE_H
+..\app\user_lib.h(65): warning:  #47-D: incompatible redefinition of macro "SET_BIT"  (declared at line 207 of "../Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h")
+  #define SET_BIT(x, n)       ((x) |=  (1U << (n)))
+..\app\user_lib.h(68): warning:  #47-D: incompatible redefinition of macro "CLEAR_BIT"  (declared at line 209 of "../Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h")
+  #define CLEAR_BIT(x, n)     ((x) &= ~(1U << (n)))
+..\app\referee.c(23): warning:  #144-D: a value of type "uint8_t *" cannot be used to initialize an entity of type "char *"
+              char *rx_data = &rx_data_input[i];
+..\app\referee.c(24): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "uint8_t *"
+              if (!Verify_CRC8_Check_Sum(rx_data, 5))
+..\app\referee.c(28): warning:  #42-D: operand types are incompatible ("char *" and "int")
+              if(rx_data[3] != seq_last +1 && rx_data > seq_last){
+..\app\referee.c(39): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "uint8_t *"
+              if (!Verify_CRC16_Check_Sum(rx_data, data_length + 9))
+..\app\referee.c(70): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "uint8_t *"
+                  pack_float_to_4bytes(referee_data.power_heat_data.buffer_energy,data_temp);
+..\app\referee.c(104): warning:  #167-D: argument of type "sentry_info_t *" is incompatible with parameter of type "char *"
+  				CMD_PackPacket(&referee_data.sentry_info, 6, 0x20D, data_buffer_ref);
+..\app\referee.c(104): warning:  #167-D: argument of type "char *" is incompatible with parameter of type "uint8_t *"
+  				CMD_PackPacket(&referee_data.sentry_info, 6, 0x20D, data_buffer_ref);
+..\app\referee.c(118): warning:  #117-D: non-void function "Referee_data_decode"  should return a value
+                  return;
+..\app\referee.c(121): warning:  #1-D: last line of file ends without a newline
+  }
+..\app\referee.c(121): warning:  #940-D: missing return statement at end of non-void function "Referee_data_decode" 
+  }
+..\app\referee.c: 13 warnings, 0 errors
+compiling stm32h7xx_hal_tim.c...
+linking...
+Program Size: Code=58100 RO-data=1936 RW-data=17064 ZI-data=184272  
+FromELF: creating hex file...
+"Communication_H7\Communication_H7.axf" - 0 Error(s), 92 Warning(s).
+
+<h2>Software Packages used:</h2>
+
+Package Vendor: ARM
+                https://www.keil.com/pack/ARM.CMSIS.6.3.0.pack
+                ARM.CMSIS.6.3.0
+                CMSIS (Common Microcontroller Software Interface Standard)
+   * Component: CORE Version: 6.2.0
+
+Package Vendor: Keil
+                https://www.keil.com/pack/Keil.STM32H7xx_DFP.4.1.3.pack
+                Keil.STM32H7xx_DFP.4.1.3
+                STMicroelectronics STM32H7 Series Device Support
+
+<h2>Collection of Component include folders:</h2>
+  .\RTE\_Communication_H7
+  C:\Users\csh_L\AppData\Local\Arm\Packs\ARM\CMSIS\6.3.0\CMSIS\Core\Include
+
+<h2>Collection of Component Files used:</h2>
+
+   * Component: ARM::CMSIS:CORE:6.2.0
+      Include file:  CMSIS\Core\Include\tz_context.h
+Build Time Elapsed:  00:00:40
+</pre>
+</body>
+</html>
