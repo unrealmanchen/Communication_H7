@@ -3,7 +3,7 @@
 #include "usart.h"
 #include "cmsis_os.h"
 
-#define RX_BUFFER_SIZE 512
+#define RX_BUFFER_SIZE 128
 
 
 typedef struct {
@@ -27,11 +27,12 @@ typedef struct {
     osThreadDef_t thread_Tx_t;
     osThreadId thread_Tx_Hdl;
 
+
     int mail_buffer_size;
     struct os_mailQ_cb *mail_Tx_cb; 
     osMailQDef_t mail_Tx_t; 
     osMailQId mail_Tx_Hdl;       
-    
+    uint8_t * mail_sending;
     int size;
     int size_RD;
     

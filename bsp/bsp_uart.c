@@ -271,7 +271,7 @@ void UART_IT_Handler(UART_HandleTypeDef *huart)
         uart->Rd_Ptr[Mem_Loc] = -1;
         if(uart_init_flag == 1 && uart->function != NULL)
             uart->function(&uart->Rd_Buffer[Mem_Loc][0], uart->size_RD);
- 
+
     }
     else if (__HAL_UART_GET_FLAG(uart->huart, UART_IT_RXNE))
     {
@@ -286,9 +286,28 @@ void UART_IT_Handler(UART_HandleTypeDef *huart)
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
     UART_STRUCT * uart =Search_UART_ST(huart);
-    if(uart->init_Tx_thread == 1)
-	    osSemaphoreRelease(uart->sem_Tx_READY_Hdl);
+    if(uart->init_Tx_thread == 1){
+        osSemaphoreRelease(uart->sem_Tx_READY_Hdl);
 
+        taskENTER_CRITICAL();
+        osMailFree(uart->mail_Tx_Hdl, uart->mail_sending );
+        taskEXIT_CRITICAL();
+
+        osEvent evt = osMailGet(uart->mail_Tx_Hdl,0);
+
+        if (evt.status != osEventMail) 
+            return;
+
+        
+        uint8_t *block = (uint8_t*)evt.value.p;
+        uart->mail_sending = block;
+        uint16_t len = block[0] | (block[1] << 8);
+        uint8_t *data = block + 2;
+
+        HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(&uart->huart, data, len);
+        if (status != HAL_OK) 
+            Error_Handler();
+    }
 }
 
 
@@ -317,6 +336,13 @@ int UART_Tx(UART_STRUCT * uart,void * data_in,int len){
         return 3;
     }
 
+    if(osSemaphoreWait(uart->sem_Tx_READY_Hdl, 0)==osOK){
+        HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(&uart->huart, data, len);
+        if (status != HAL_OK) 
+            Error_Handler();
+        return 0;
+    }
+    
     uint8_t *msg_ptr = osMailAlloc(uart->mail_Tx_Hdl, 0);
     if (!msg_ptr) {
         Error_Hdl(TX_send,uart->uart_id,2);
