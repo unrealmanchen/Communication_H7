@@ -31,7 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#define BREAKPOINT __asm volatile ("BKPT #0")
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

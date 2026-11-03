@@ -20,7 +20,8 @@
                 "app",
                 "bsp",
                 "task",
-                "terminal"
+                "terminal",
+                "app_new"
             ],
             "defines": [
                 "USE_PWR_LDO_SUPPLY",

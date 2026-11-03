@@ -306,7 +306,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 
         HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(&uart->huart, data, len);
         if (status != HAL_OK) 
-            Error_Handler();
+            BREAKPOINT;
     }
 }
 
@@ -339,7 +339,7 @@ int UART_Tx(UART_STRUCT * uart,void * data_in,int len){
     if(osSemaphoreWait(uart->sem_Tx_READY_Hdl, 0)==osOK){
         HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(&uart->huart, data, len);
         if (status != HAL_OK) 
-            Error_Handler();
+            BREAKPOINT;
         return 0;
     }
     
