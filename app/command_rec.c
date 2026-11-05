@@ -19,27 +19,17 @@
 char data_out[30];
 char data_buffer[30];
 
-typedef enum status_
-{ // 当前状态
-    header = 0,
-    length0,
-    length1,
-    stained,
-    crc8,
-    cmd_1,
-    cmd_2,
-    data,
-    crc16_1,
-    crc16_2
-} status_t;
-typedef struct rec_status_t_
+void rec_status_init(rec_status_t *rec)
 {
-    status_t status; // 当前期待收到什么值
-    uint16_t data_length;
-    uint16_t cmd_id;
-    char data[64]; // 整个报文
-    uint16_t data_length_ptr;
-} rec_status_t;
+    if (rec == NULL)
+        return;
+
+    rec->status          = header;   /* 初始期待的字段，一般传“期待帧头”那个枚举值 */
+    rec->data_length     = 0;
+    rec->cmd_id          = 0;
+    rec->data_length_ptr = 0;
+    memset(rec->data, 0, sizeof(rec->data));
+}
 
 int upc_decode(char data_, rec_status_t *cb)
 {
@@ -66,8 +56,8 @@ int upc_decode(char data_, rec_status_t *cb)
         break;
     case crc8:
         cb->data[0] = 0xA5;
-        // cb->data[1]=cb->data_length >> 8;
-        cb->data[2] = cb->data_length & 0xff;
+        cb->data[1] = cb->data_length & 0xff; 
+        cb->data[2] = (cb->data_length >> 8) & 0xff;
         cb->data[3] = 0x00;
         cb->data[4] = data_;
         if (!Verify_CRC8_Check_Sum(cb->data, 5))
@@ -85,10 +75,14 @@ int upc_decode(char data_, rec_status_t *cb)
         cb->cmd_id = cb->data[5] | cb->data[6] << 8;
         break;
     case data:
-        cb->data[cb->data_length_ptr] = data_;
+        cb->data[7 + cb->data_length_ptr] = data_;
         cb->data_length_ptr++;
         if (cb->data_length_ptr == cb->data_length)
+        {
+            cb->data_length_ptr = 0;
             cb->status = crc16_1;
+        }
+
         break;
     case crc16_1:
         cb->data[7 + cb->data_length] = data_;
@@ -105,6 +99,11 @@ int upc_decode(char data_, rec_status_t *cb)
 void cmd_function(rec_status_t *cb)
 {
     uint8_t *data = &cb->data[7];
+
+    memset(data_out, 0, 30);
+        CMD_PackPacket(data, 13, 0x103, data_buffer);
+        UART_Tx(&UART_5, data_buffer, sizeof(data_buffer));
+        return;
     switch ((upc_cmd_t)cb->cmd_id)
     {
         /////////////////////////////////////////////////////////////////////////////////////// NUC

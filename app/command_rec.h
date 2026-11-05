@@ -60,8 +60,32 @@ typedef enum
     MSG_BIG_GIMBAL_IMU_INFO_ID = 0x102
 } upc_cmd_t;
 
+typedef enum status_
+{ // 当前状态
+    header = 0,
+    length0,
+    length1,
+    stained,
+    crc8,
+    cmd_1,
+    cmd_2,
+    data,
+    crc16_1,
+    crc16_2
+} status_t;
 
-int upc_decode(char* rx_data,int size);
+
+typedef struct rec_status_t_
+{
+    status_t status; // 当前期待收到什么值
+    uint16_t data_length;
+    uint16_t cmd_id;
+    char data[64]; // 整个报文
+    uint16_t data_length_ptr;
+} rec_status_t;
+void rec_status_init(rec_status_t *rec);
+int upc_decode(char data_, rec_status_t *cb);
+
 // void temp_imu_handler(uint8_t* data);
 
 #endif

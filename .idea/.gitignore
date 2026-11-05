@@ -1,10 +1,100 @@
-# 默认忽略的文件
-/shelf/
-/workspace.xml
-# 已忽略包含查询文件的默认文件夹
-/queries/
-# Datasource local storage ignored files
-/dataSources/
-/dataSources.local.xml
-# 基于编辑器的 HTTP 客户端请求
-/httpRequests/
+# =========================
+# 1. 编译产物 (C/C++)
+# =========================
+# 目标文件
+*.o
+*.obj
+*.lo
+*.slo
+
+# 预编译头
+*.gch
+*.pch
+
+# 静态库与动态库
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.lai
+*.la
+
+# 可执行文件
+*.exe
+*.out
+*.app
+
+# 依赖文件
+*.d
+
+# =========================
+# 2. CMake 构建目录与缓存
+# =========================
+# 通常 build 目录是不需要的 (如果你在根目录构建)
+build/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# =========================
+# 3. STM32 / 嵌入式特定产物
+# =========================
+# 编译输出的固件与调试文件
+*.hex
+*.bin
+*.elf
+*.axf
+*.map
+*.lst
+*.crf
+*.dep
+*.htm
+*.build_log.htm
+*.lnp
+*.sct
+
+# Keil MDK (如果涉及)
+*.uvguix.*
+*.uvoptx
+*.bak
+*.orig
+USER/DebugConfig/
+USER/RTE/
+
+# =========================
+# 4. IDE 与编辑器 (VS Code)
+# =========================
+# 忽略整个 .vscode 文件夹，但保留推荐的共享配置
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
+# =========================
+# 5. 操作系统与临时文件
+# =========================
+# Windows
+Thumbs.db
+desktop.ini
+
+# macOS (如果你有 Mac 协作)
+.DS_Store
+
+# 临时文件与日志
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# 压缩包 (视情况保留)
+*.zip
+*.rar
+*.7z

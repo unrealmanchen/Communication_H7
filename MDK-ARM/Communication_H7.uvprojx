@@ -10,7 +10,7 @@
       <TargetName>Communication_H7</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060960::V5.06 update 7 (build 960)::ARMCC</pCCUsed>
+      <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCC</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>USE_PWR_LDO_SUPPLY,USE_HAL_DRIVER,STM32H743xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Drivers/CMSIS/Device/ST/STM32H7xx/Include;../Drivers/CMSIS/Include;../app;../bsp;../task;../terminal</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Drivers/CMSIS/Device/ST/STM32H7xx/Include;../Drivers/CMSIS/Include;../app;../bsp;../task;../terminal;..\app_new</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -652,6 +652,16 @@
               <FileName>main_thread.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\app\main_thread.c</FilePath>
+            </File>
+            <File>
+              <FileName>ring_buffer_c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app_new\ring_buffer_c.c</FilePath>
+            </File>
+            <File>
+              <FileName>ring_buffer_c.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\app_new\ring_buffer_c.h</FilePath>
             </File>
           </Files>
         </Group>

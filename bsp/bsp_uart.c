@@ -13,6 +13,8 @@
 #include "imu_interface.h"
 
 #include "main_thread.h"
+#include "ring_buffer_c.h"
+
 /*
 此new文件意义是将串口硬件初始化和串口应用的代码解耦，方便纠错以及理顺代码逻辑
 堆屎山的时候稍微写点注释也好哇。（（（
@@ -71,7 +73,7 @@ UART_STRUCT UART_1 = {
     .uart_id = 1,
     .huart = &huart1, 
     .function = Transmit_data2Terminal ,
-    .init_Tx_thread =0,
+    .init_Tx_thread =1,
     .thread_name = "UART_1_TX",
     .thread_osPriority = osPriorityLow,
     .thread_stacksize = 128,
@@ -84,7 +86,12 @@ UART_STRUCT UART_2 = {
     .uart_id = 2,
     .huart = &huart2, 
     .function =imu_read_data,
-    .init_Tx_thread = 0
+    .init_Tx_thread =1,
+    .thread_name = "UART_2_TX",
+    .thread_osPriority = osPriorityLow,
+    .thread_stacksize = 128,
+    .TxTask = UART_2_TxTask,
+    .mail_buffer_size = 256
 };//imu
     
 UART_STRUCT UART_3 = {
@@ -96,7 +103,7 @@ UART_STRUCT UART_3 = {
     .thread_osPriority = osPriorityLow,
     .thread_stacksize = 128,
     .TxTask = UART_3_TxTask,
-    .mail_buffer_size = 256
+    .mail_buffer_size = 128
 };//云台
     
 UART_STRUCT UART_4 = {
@@ -108,7 +115,7 @@ UART_STRUCT UART_4 = {
     .thread_osPriority = osPriorityLow,
     .thread_stacksize = 256,
     .TxTask = UART_4_TxTask,
-    .mail_buffer_size = 256
+    .mail_buffer_size = 128
 };//底盘
     
 UART_STRUCT UART_5 = {
@@ -120,7 +127,7 @@ UART_STRUCT UART_5 = {
     .thread_osPriority = osPriorityLow,
     .thread_stacksize = 128,
     .TxTask = UART_5_TxTask,
-    .mail_buffer_size = 256
+    .mail_buffer_size = 128
 };//上位机nuc
     
 UART_STRUCT UART_6 = {
@@ -132,7 +139,7 @@ UART_STRUCT UART_6 = {
     .thread_osPriority = osPriorityLow,
     .thread_stacksize = 128,
     .TxTask = UART_6_TxTask,
-    .mail_buffer_size = 512
+    .mail_buffer_size = 128
 };//裁判
     
 UART_STRUCT UART_7 = {
@@ -170,15 +177,24 @@ UART_STRUCT *Search_UART_ST(UART_HandleTypeDef *huart_in)
     Error_Handler();
     return NULL;
 }
+
+void vApplicationStackOverflowHook(TaskHandle_t xTask, signed char *pcTaskName)
+{
+    BREAKPOINT;   // 命中就说明是栈击穿
+}
+
+volatile UART_STRUCT *g_uart_entry;
+volatile UART_STRUCT *g_uart_exit;
 void UART_init(UART_STRUCT *uart)
 {
+    g_uart_entry = uart;
+    uart->canary_guard[0] = 0xAA;
+    uart->canary_guard[1] = 0xAA;
+    uart->canary_guard[2] = 0xAA;
+    uart->canary_guard[3] = 0xAA;
     //test = DMA_Instance(uart->huart->hdmarx);
-
-    uart->Hd_Ptr[0] = -1;
-    uart->Hd_Ptr[1] = -1;
-    uart->Rd_Ptr[0] = -1;
-    uart->Rd_Ptr[1] = -1;
-
+    uart->ring_ptr = rb_c_create(128);
+    g_uart_exit = uart; 
     uart->huart->Instance->CR3 |= USART_CR3_DMAR;    // uart开启dma
     __HAL_UART_ENABLE_IT(uart->huart, UART_IT_IDLE); // 开启空闲中断
 
@@ -217,19 +233,30 @@ void UART_init(UART_STRUCT *uart)
     uart->sem_Tx_READY_Hdl = osSemaphoreCreate(&uart->sem_Tx_READY_t, 1); 
     uart->thread_Tx_Hdl = osThreadCreate(&uart->thread_Tx_t, uart);  
     uart->mail_Tx_Hdl = osMailCreate(&uart->mail_Tx_t, NULL);   
+    if(uart->sem_Tx_READY_Hdl == NULL || uart->thread_Tx_Hdl == NULL || uart->mail_Tx_Hdl == NULL)
+        BREAKPOINT;
+
+    rec_status_init(&uart->rev_status);
+    uart->last_copy_ptr = 0;
+
 }
+
+
 
 void UART_Mem_Full_IT(UART_STRUCT *uart, int MEM_Loc)
 {
-    if (uart->Hd_Ptr[MEM_Loc] != RX_BUFFER_SIZE - 1)
-    {
-        memcpy(&uart->Rd_Buffer[!MEM_Loc][0],
-               &uart->Hd_Buffer[MEM_Loc][uart->Hd_Ptr[MEM_Loc] + 1],
-               RX_BUFFER_SIZE - uart->Hd_Ptr[MEM_Loc] - 1);
-        uart->Rd_Ptr[!MEM_Loc] = RX_BUFFER_SIZE - uart->Hd_Ptr[MEM_Loc] - 2;
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    int length = RX_BUFFER_SIZE - DMA_Instance(uart->huart->hdmarx)->NDTR - (uart->last_copy_ptr+1);
+    for(int i=0;i<length;i++){
+        if(rb_c_push(uart->ring_ptr,uart->Hd_Buffer[uart->last_copy_ptr+i])==false){
+            uart->last_copy_ptr = -1;
+						vTaskNotifyGiveFromISR(uart->thread_Tx_Hdl, &xHigherPriorityTaskWoken);
+            BREAKPOINT;
+            return;
+        }
     }
-    uart->Hd_Ptr[MEM_Loc] = -1;
-    uart->Rd_Ptr[MEM_Loc] = -1;
+		vTaskNotifyGiveFromISR(uart->thread_Tx_Hdl, &xHigherPriorityTaskWoken);
+    uart->last_copy_ptr = -1;
 }
 
 void UART_Mem0_Full(DMA_HandleTypeDef *hdma)
@@ -246,6 +273,7 @@ void UART_Mem1_Full(DMA_HandleTypeDef *hdma)
 
 void UART_IT_Handler(UART_HandleTypeDef *huart)
 {
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     UART_STRUCT *uart = Search_UART_ST(huart);
 
     if (__HAL_UART_GET_FLAG(uart->huart, UART_FLAG_IDLE))
@@ -255,23 +283,21 @@ void UART_IT_Handler(UART_HandleTypeDef *huart)
         int Mem_Loc = (DMA_Instance(uart->huart->hdmarx)->CR & DMA_SxCR_CT);
         if(Mem_Loc != 0) 
             Mem_Loc = 1;
+        
+        int length = RX_BUFFER_SIZE - DMA_Instance(uart->huart->hdmarx)->NDTR;
+        
+        for(int i=0;i<length;i++){
+            if(rb_c_push(uart->ring_ptr,uart->Hd_Buffer[Mem_Loc][i])==false){
+                uart->last_copy_ptr = i -1;
+                vTaskNotifyGiveFromISR(uart->thread_Tx_Hdl, &xHigherPriorityTaskWoken);
+                BREAKPOINT;
+                return;
+            }
+        }
+        uart->last_copy_ptr = RX_BUFFER_SIZE - DMA_Instance(uart->huart->hdmarx)->NDTR;  
+        vTaskNotifyGiveFromISR(uart->thread_Tx_Hdl, &xHigherPriorityTaskWoken);
 
-        uart->size = RX_BUFFER_SIZE - DMA_Instance(uart->huart->hdmarx)->NDTR 
-        - 1 - uart->Hd_Ptr[Mem_Loc];
-        uart->size_RD = uart->size + uart->Rd_Ptr[Mem_Loc] + 1;
-
-        if(uart->size_RD < 0 || uart->size_RD >RX_BUFFER_SIZE)
-            return;
-
-        if(uart->size < 0 || uart->size > RX_BUFFER_SIZE)
-            return;
-        //与HDbuffer对齐数据 整理dma切断的数据流行
-        uart->Hd_Ptr[Mem_Loc] = RX_BUFFER_SIZE - DMA_Instance(uart->huart->hdmarx)->NDTR - 1;
-        memcpy(&uart->Rd_Buffer[Mem_Loc][uart->Rd_Ptr[Mem_Loc] + 1], &uart->Hd_Buffer[Mem_Loc][uart->Hd_Ptr[Mem_Loc] - uart->size + 1], uart->size);
-        uart->Rd_Ptr[Mem_Loc] = -1;
-        if(uart_init_flag == 1 && uart->function != NULL)
-            uart->function(&uart->Rd_Buffer[Mem_Loc][0], uart->size_RD);
-
+        
     }
     else if (__HAL_UART_GET_FLAG(uart->huart, UART_IT_RXNE))
     {
@@ -289,9 +315,9 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
     if(uart->init_Tx_thread == 1){
         osSemaphoreRelease(uart->sem_Tx_READY_Hdl);
 
-        taskENTER_CRITICAL();
+        int saved = taskENTER_CRITICAL_FROM_ISR();
         osMailFree(uart->mail_Tx_Hdl, uart->mail_sending );
-        taskEXIT_CRITICAL();
+        taskEXIT_CRITICAL_FROM_ISR(saved);
 
         osEvent evt = osMailGet(uart->mail_Tx_Hdl,0);
 
@@ -304,7 +330,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
         uint16_t len = block[0] | (block[1] << 8);
         uint8_t *data = block + 2;
 
-        HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(&uart->huart, data, len);
+        HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(uart->huart, data, len);
         if (status != HAL_OK) 
             BREAKPOINT;
     }
@@ -337,7 +363,7 @@ int UART_Tx(UART_STRUCT * uart,void * data_in,int len){
     }
 
     if(osSemaphoreWait(uart->sem_Tx_READY_Hdl, 0)==osOK){
-        HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(&uart->huart, data, len);
+        HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(uart->huart, data, len);
         if (status != HAL_OK) 
             BREAKPOINT;
         return 0;
@@ -388,140 +414,99 @@ static void UART_TxTask(const void *arg){
 
 static void UART_1_TxTask(const void *arg){
     UART_STRUCT * uart = &UART_1;
-    osSemaphoreWait(uart->sem_Tx_READY_Hdl, osWaitForever);
+    uint8_t data;
     while (1) {
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        while(!rb_c_empty(uart->ring_ptr)){
+            rb_c_pop(uart->ring_ptr,&data);
+            upc_decode(data,&uart->rev_status);
+        }
         
-        osEvent evt = osMailGet(uart->mail_Tx_Hdl,osWaitForever);
-
-        if (evt.status != osEventMail) 
-            continue;
-
-        uint8_t *block = (uint8_t*)evt.value.p;
-        uint16_t len = block[0] | (block[1] << 8);
-        uint8_t *data = block + 2;
-
-        HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(uart->huart, data, len);
-        if (status != HAL_OK) 
-            Error_Handler();
-        osSemaphoreWait(uart->sem_Tx_READY_Hdl, osWaitForever);
-        osMailFree(uart->mail_Tx_Hdl, block);
-        // 互斥量在DMA完成中断中释放
     }
 }
 
 
 
 static void UART_3_TxTask(const void *arg){
-    osSemaphoreWait(UART_3.sem_Tx_READY_Hdl, osWaitForever);
+    UART_STRUCT * uart = &UART_3;
+    uint8_t data;
     while (1) {
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        while(!rb_c_empty(uart->ring_ptr)){
+            rb_c_pop(uart->ring_ptr,&data);
+            upc_decode(data,&uart->rev_status);
+        }
         
-        osEvent evt = osMailGet(UART_3.mail_Tx_Hdl,osWaitForever);
-
-        if (evt.status != osEventMail) 
-            continue;
-
-        uint8_t *block = (uint8_t*)evt.value.p;
-        uint16_t len = block[0] | (block[1] << 8);
-        uint8_t *data = block + 2;
-
-        HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(&huart3, data, len);
-        if (status != HAL_OK) 
-            Error_Handler();
-        osSemaphoreWait(UART_3.sem_Tx_READY_Hdl, osWaitForever);
-        osMailFree(UART_3.mail_Tx_Hdl, block);
-        // 互斥量在DMA完成中断中释放
     }
 }
 
 static void UART_4_TxTask(const void *arg){
-    osSemaphoreWait(UART_4.sem_Tx_READY_Hdl, osWaitForever);
+    UART_STRUCT * uart = &UART_4;
+    uint8_t data;
     while (1) {
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        while(!rb_c_empty(uart->ring_ptr)){
+            rb_c_pop(uart->ring_ptr,&data);
+            upc_decode(data,&uart->rev_status);
+        }
         
-        osEvent evt = osMailGet(UART_4.mail_Tx_Hdl,osWaitForever);
-
-        if (evt.status != osEventMail) 
-            continue;
-
-        uint8_t *block = (uint8_t*)evt.value.p;
-        uint16_t len = block[0] | (block[1] << 8);
-        uint8_t *data = block + 2;
-
-        HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(&huart4, data, len);
-        if (status != HAL_OK) 
-            Error_Handler();
-        osSemaphoreWait(UART_4.sem_Tx_READY_Hdl, osWaitForever);
-        osMailFree(UART_4.mail_Tx_Hdl, block);
-        // 互斥量在DMA完成中断中释放
     }
 }
 static void UART_5_TxTask(const void *arg){
-    osSemaphoreWait(UART_5.sem_Tx_READY_Hdl, osWaitForever);
+    UART_STRUCT * uart = &UART_5;
+    uint8_t data;
     while (1) {
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        while(!rb_c_empty(uart->ring_ptr)){
+            rb_c_pop(uart->ring_ptr,&data);
+            upc_decode(data,&uart->rev_status);
+        }
         
-        osEvent evt = osMailGet(UART_5.mail_Tx_Hdl,osWaitForever);
-
-        if (evt.status != osEventMail) 
-            continue;
-
-        uint8_t *block = (uint8_t*)evt.value.p;
-        uint16_t len = block[0] | (block[1] << 8);
-        uint8_t *data = block + 2;
-
-        HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(&huart5, data, len);
-        if (status != HAL_OK) 
-            Error_Handler();
-        osSemaphoreWait(UART_5.sem_Tx_READY_Hdl, osWaitForever);
-        osMailFree(UART_5.mail_Tx_Hdl, block);
-        // 互斥量在DMA完成中断中释放
     }
 }
 
 static void UART_6_TxTask(const void *arg){
-    osSemaphoreWait(UART_6.sem_Tx_READY_Hdl, osWaitForever);
+    UART_STRUCT * uart = &UART_6;
+    uint8_t data;
     while (1) {
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        while(!rb_c_empty(uart->ring_ptr)){
+            rb_c_pop(uart->ring_ptr,&data);
+            upc_decode(data,&uart->rev_status);
+        }
         
-        osEvent evt = osMailGet(UART_6.mail_Tx_Hdl,osWaitForever);
-
-        if (evt.status != osEventMail) 
-            continue;
-
-        uint8_t *block = (uint8_t*)evt.value.p;
-        uint16_t len = block[0] | (block[1] << 8);
-        uint8_t *data = block + 2;
-
-        HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(&huart6, data, len);
-        if (status != HAL_OK) 
-            Error_Handler();
-        osSemaphoreWait(UART_6.sem_Tx_READY_Hdl, osWaitForever);
-        osMailFree(UART_6.mail_Tx_Hdl, block);
-        // 互斥量在DMA完成中断中释放
     }
 }
 
 static void UART_7_TxTask(const void *arg){
-    osSemaphoreWait(UART_7.sem_Tx_READY_Hdl, osWaitForever);
+    UART_STRUCT * uart = &UART_7;
+    uint8_t data;
     while (1) {
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        while(!rb_c_empty(uart->ring_ptr)){
+            rb_c_pop(uart->ring_ptr,&data);
+            upc_decode(data,&uart->rev_status);
+        }
         
-        osEvent evt = osMailGet(UART_7.mail_Tx_Hdl,osWaitForever);
+    }
+}
 
-        if (evt.status != osEventMail) 
-            continue;
-
-        uint8_t *block = (uint8_t*)evt.value.p;
-        uint16_t len = block[0] | (block[1] << 8);
-        uint8_t *data = block + 2;
-
-        HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(&huart7, data, len);
-        if (status != HAL_OK) 
-            Error_Handler();
-        osSemaphoreWait(UART_7.sem_Tx_READY_Hdl, osWaitForever);
-        osMailFree(UART_7.mail_Tx_Hdl, block);
-        // 互斥量在DMA完成中断中释放
+static void UART_2_TxTask(const void *arg){
+    UART_STRUCT * uart = &UART_2;
+    uint8_t data;
+    while (1) {
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        while(!rb_c_empty(uart->ring_ptr)){
+            rb_c_pop(uart->ring_ptr,&data);
+            upc_decode(data,&uart->rev_status);
+        }
+        
     }
 }
 
 void UART_init_list()
 {
+    
     UART_init(&UART_1);
     UART_init(&UART_2);
     UART_init(&UART_3);

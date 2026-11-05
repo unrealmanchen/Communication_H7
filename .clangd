@@ -15,6 +15,7 @@ CompileFlags:
     - '-Id:/Code/RM/Communication_H7/bsp'
     - '-Id:/Code/RM/Communication_H7/task'
     - '-Id:/Code/RM/Communication_H7/terminal'
+    - '-Id:/Code/RM/Communication_H7/app_new'
     - '-DUSE_PWR_LDO_SUPPLY'
     - '-DUSE_HAL_DRIVER'
     - '-DSTM32H743xx'

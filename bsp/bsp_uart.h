@@ -2,16 +2,15 @@
 #define UART_NEW
 #include "usart.h"
 #include "cmsis_os.h"
-
+#include "ring_buffer_c.h"
+#include "command_rec.h"
 #define RX_BUFFER_SIZE 128
 
 
 typedef struct {
     int uart_id;
     char Hd_Buffer[2][RX_BUFFER_SIZE];//硬件dma搬运位置
-    char Rd_Buffer[2][RX_BUFFER_SIZE];//帧头整理后数据流
-    int Hd_Ptr[2];//当前写到的位置
-    int Rd_Ptr[2];//当前写到的位置
+    uint32_t canary_guard[4];
     UART_HandleTypeDef * huart;
     void (*function)(char * data ,int size);
 
@@ -33,8 +32,11 @@ typedef struct {
     osMailQDef_t mail_Tx_t; 
     osMailQId mail_Tx_Hdl;       
     uint8_t * mail_sending;
-    int size;
-    int size_RD;
+
+    rec_status_t rev_status;
+
+    RingBufferC_u8_t * ring_ptr;
+    int last_copy_ptr; //拷贝过的最后一个字符的地址
     
 }UART_STRUCT;
 
