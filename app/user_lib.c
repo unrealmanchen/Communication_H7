@@ -39,38 +39,29 @@ void CMD_PackPacket(char *data_in, uint16_t data_len, uint16_t cmd_id, uint8_t *
     uint8_t crc8;
     uint16_t crc16;
     
-    // 1. 填充帧头
     data_out[offset++] = SOF_VALUE;                    // SOF
     
-    // data_length (小端模式)
     data_out[offset++] = data_len & 0xFF;              // 低字节
     data_out[offset++] = (data_len >> 8) & 0xFF;       // 高字节
     
     data_out[offset++] = 0;                           // seq
     
-    // 暂留CRC8位置，先填0
     data_out[offset++] = 0;                             // CRC8占位
     
-    // 2. 填充cmd_id (小端模式)
     data_out[offset++] = cmd_id & 0xFF;                 // 低字节
     data_out[offset++] = (cmd_id >> 8) & 0xFF;          // 高字节
     
-    // 3. 填充数据
     if (data_in != NULL && data_len > 0) {
         memcpy(&data_out[offset], data_in, data_len);
         offset += data_len;
     }
     
-    // 4. 计算并填充CRC8 (帧头校验)
-    // CRC8范围：SOF + data_length + seq，共4字节
     crc8 = Get_CRC8_Check_Sum(data_out, FRAME_HEADER_LEN - 1, CRC8_INIT);
     data_out[4] = crc8;  // 帧头第5字节是CRC8
     
-    // 5. 计算并填充CRC16 (整包校验)
     total_len = FRAME_HEADER_LEN + CMD_ID_LEN + data_len;
     crc16 = Get_CRC16_Check_Sum(data_out, total_len, CRC16_INIT);
     
-    // 追加CRC16到末尾
     data_out[total_len] = (uint8_t)(crc16 & 0xFF);        // 低字节
     data_out[total_len + 1] = (uint8_t)((crc16 >> 8) & 0xFF); // 高字节
 }

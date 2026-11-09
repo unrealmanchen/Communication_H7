@@ -31,7 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#define BREAKPOINT __asm volatile ("BKPT #0")
+#define BREAKPOINT __asm volatile ("BKPT #0")//非调试的时候define空 不然机器会死机
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

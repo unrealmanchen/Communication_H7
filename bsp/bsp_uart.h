@@ -10,7 +10,7 @@
 typedef struct {
     int uart_id;
     char Hd_Buffer[2][RX_BUFFER_SIZE];//硬件dma搬运位置
-    uint32_t canary_guard[4];
+
     UART_HandleTypeDef * huart;
     void (*function)(char * data ,int size);
 
