@@ -10,7 +10,7 @@ void Hardware_Init(void){
     Timer_Init();
 
     
-    UART_1_INIT();
+    UART_init_list();
     //UART_6_INIT();
     uart_init_flag =1;
 }

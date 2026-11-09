@@ -16,14 +16,12 @@
 #include <stdint.h>
 #include <string.h>
 
-// 假设这两个函数已在其他地方实现
-
 #define SOF_VALUE       0xA5
 #define FRAME_HEADER_LEN  5
 #define CMD_ID_LEN        2
 #define CRC16_LEN         2
-#define CRC8_INIT         0xFF  // 假设值，请根据实际调整
-#define CRC16_INIT        0xFFFF // 假设值，请根据实际调整
+#define CRC8_INIT         0xFF  
+#define CRC16_INIT        0xFFFF 
 
 /**
  * @brief 组串口协议包
@@ -66,7 +64,7 @@ void CMD_PackPacket(char *data_in, uint16_t data_len, uint16_t cmd_id, uint8_t *
     data_out[total_len + 1] = (uint8_t)((crc16 >> 8) & 0xFF); // 高字节
 }
 char CMD_Tx_data_temp[256];
-void CMD_Transmit(char *data_in, uint16_t data_len, uint16_t cmd_id, UART_STRUCT *uart){
+void CMD_Transmit(char *data_in, uint16_t data_len, uint16_t cmd_id, UART_STRUCT *uart){////线程不安全！！！！！！！！！
     memset(CMD_Tx_data_temp,0,256);
     CMD_PackPacket(data_in,data_len,cmd_id,CMD_Tx_data_temp);
     UART_Tx(uart,CMD_Tx_data_temp,data_len+5+2+2);

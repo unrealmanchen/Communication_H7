@@ -77,7 +77,7 @@ typedef enum status_
 
 typedef struct rec_status_t_
 {
-    void * father_node;
+    void * father_node;//定位串口
     status_t status; // 当前期待收到什么值
     uint16_t data_length;
     uint16_t cmd_id;

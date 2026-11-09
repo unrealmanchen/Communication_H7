@@ -10,6 +10,7 @@
 typedef struct {
     int uart_id;
     char Hd_Buffer[2][RX_BUFFER_SIZE];//硬件dma搬运位置
+    int last_copy_ptr; //拷贝过的最后一个字符的地址
 
     UART_HandleTypeDef * huart;
     void (*function)(char * data ,int size);
@@ -20,7 +21,6 @@ typedef struct {
     int init_Tx_thread;
     
     char thread_name[10];
-    void (*TxTask)(const void *arg);
     osPriority thread_osPriority;
     uint32_t   thread_stacksize;
     osThreadDef_t thread_Tx_t;
@@ -31,12 +31,12 @@ typedef struct {
     struct os_mailQ_cb *mail_Tx_cb; 
     osMailQDef_t mail_Tx_t; 
     osMailQId mail_Tx_Hdl;       
-    uint8_t * mail_sending;
+    uint8_t * mail_sending;//正在发送中的mail内容块 dma传输完毕前不能free
 
     rec_status_t rev_status;
 
     RingBufferC_u8_t * ring_ptr;
-    int last_copy_ptr; //拷贝过的最后一个字符的地址
+    
     
 }UART_STRUCT;
 
@@ -59,8 +59,7 @@ extern UART_STRUCT UART_7;
 
 
 extern int uart_init_flag;
-void UART_1_INIT(void);
-void UART_6_INIT(void);
+void UART_init_list();
 
 int UART_Tx(UART_STRUCT * uart,void * data,int len);
 void UART_IT_Handler(UART_HandleTypeDef *huart);

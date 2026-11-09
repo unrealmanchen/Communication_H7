@@ -75,7 +75,6 @@ UART_STRUCT UART_1 = {
     .thread_name = "UART_1_TX",
     .thread_osPriority = osPriorityLow,
     .thread_stacksize = 128,
-    .TxTask = UART_1_TxTask,
     .mail_buffer_size = 64
 
 }; // 测试终端
@@ -88,7 +87,6 @@ UART_STRUCT UART_2 = {
     .thread_name = "UART_2_TX",
     .thread_osPriority = osPriorityLow,
     .thread_stacksize = 128,
-    .TxTask = UART_2_TxTask,
     .mail_buffer_size = 64}; // imu
 
 UART_STRUCT UART_3 = {
@@ -99,7 +97,6 @@ UART_STRUCT UART_3 = {
     .thread_name = "UART_3_TX",
     .thread_osPriority = osPriorityLow,
     .thread_stacksize = 128,
-    .TxTask = UART_3_TxTask,
     .mail_buffer_size = 64}; // 云台
 
 UART_STRUCT UART_4 = {
@@ -110,7 +107,6 @@ UART_STRUCT UART_4 = {
     .thread_name = "UART_4_TX",
     .thread_osPriority = osPriorityLow,
     .thread_stacksize = 256,
-    .TxTask = UART_4_TxTask,
     .mail_buffer_size = 64}; // 底盘
 
 UART_STRUCT UART_5 = {
@@ -121,7 +117,6 @@ UART_STRUCT UART_5 = {
     .thread_name = "UART_5_TX",
     .thread_osPriority = osPriorityLow,
     .thread_stacksize = 128,
-    .TxTask = UART_5_TxTask,
     .mail_buffer_size = 64}; // 上位机nuc
 
 UART_STRUCT UART_6 = {
@@ -132,7 +127,6 @@ UART_STRUCT UART_6 = {
     .thread_name = "UART_6_TX",
     .thread_osPriority = osPriorityLow,
     .thread_stacksize = 128,
-    .TxTask = UART_6_TxTask,
     .mail_buffer_size = 64}; // 裁判
 
 UART_STRUCT UART_7 = {
@@ -143,7 +137,6 @@ UART_STRUCT UART_7 = {
     .thread_name = "UART_7_TX",
     .thread_osPriority = osPriorityLow,
     .thread_stacksize = 128,
-    .TxTask = UART_7_TxTask,
     .mail_buffer_size = 64};
 
 UART_STRUCT *Search_UART_ST(UART_HandleTypeDef *huart_in)
@@ -218,6 +211,7 @@ void UART_init(UART_STRUCT *uart)
     uart->sem_Tx_READY_Hdl = osSemaphoreCreate(&uart->sem_Tx_READY_t, 1);
     uart->thread_Tx_Hdl = osThreadCreate(&uart->thread_Tx_t, uart);
     uart->mail_Tx_Hdl = osMailCreate(&uart->mail_Tx_t, NULL);
+    
     if (uart->sem_Tx_READY_Hdl == NULL || 
         uart->thread_Tx_Hdl == NULL || 
         uart->mail_Tx_Hdl == NULL ||
@@ -228,6 +222,18 @@ void UART_init(UART_STRUCT *uart)
     uart->rev_status.father_node = (void *)uart;
     uart->last_copy_ptr = -1;
     uart->mail_sending = NULL;
+}
+
+void UART_init_list()
+{
+
+    UART_init(&UART_1);
+    UART_init(&UART_2);
+    UART_init(&UART_3);
+    UART_init(&UART_4);
+    UART_init(&UART_5);
+    UART_init(&UART_6);
+    UART_init(&UART_7);
 }
 
 void UART_Mem_Full_IT(UART_STRUCT *uart, int MEM_Loc)
@@ -293,10 +299,9 @@ void UART_IT_Handler(UART_HandleTypeDef *huart)
         __HAL_UART_CLEAR_PEFLAG(uart->huart);
     }
 }
-/////////////////////////////////////////////////////////////
-// TX接收线程处理
 
-#define UART1_TX_BUFFER_SIZE 256
+
+
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
     UART_STRUCT *uart = Search_UART_ST(huart);
@@ -326,19 +331,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
     }
 }
 
-void UART_1_INIT()
-{
-    UART_init(&UART_1);
-    UART_init(&UART_2);
-    UART_init(&UART_3);
-    UART_init(&UART_4);
-    UART_init(&UART_5);
-    UART_init(&UART_6);
-    UART_init(&UART_7);
-    test = UART_2.huart->hdmarx->Instance;
 
-    return;
-}
 int UART_Tx(UART_STRUCT *uart, void *data_in, int len)
 {
     uint8_t *data = (uint8_t *)data_in;
@@ -416,119 +409,5 @@ static void UART_TxTask(const void *arg)
     }
 }
 
-static void UART_1_TxTask(const void *arg)
-{
-    UART_STRUCT *uart = &UART_1;
-    uint8_t data;
-    while (1)
-    {
-        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-        
-        while (!rb_c_empty(uart->ring_ptr))
-        {
-            rb_c_pop(uart->ring_ptr, &data);
-            upc_decode(data, &uart->rev_status);
-        }
-    }
-}
 
-static void UART_3_TxTask(const void *arg)
-{
-    UART_STRUCT *uart = &UART_3;
-    uint8_t data;
-    while (1)
-    {
-        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-        while (!rb_c_empty(uart->ring_ptr))
-        {
-            rb_c_pop(uart->ring_ptr, &data);
-            upc_decode(data, &uart->rev_status);
-        }
-    }
-}
 
-static void UART_4_TxTask(const void *arg)
-{
-    UART_STRUCT *uart = &UART_4;
-    uint8_t data;
-    while (1)
-    {
-        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-        while (!rb_c_empty(uart->ring_ptr))
-        {
-            rb_c_pop(uart->ring_ptr, &data);
-            upc_decode(data, &uart->rev_status);
-        }
-    }
-}
-static void UART_5_TxTask(const void *arg)
-{
-    UART_STRUCT *uart = &UART_5;
-    uint8_t data;
-    while (1)
-    {
-        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-        while (!rb_c_empty(uart->ring_ptr))
-        {
-            rb_c_pop(uart->ring_ptr, &data);
-            upc_decode(data, &uart->rev_status);
-        }
-    }
-}
-
-static void UART_6_TxTask(const void *arg)
-{
-    UART_STRUCT *uart = &UART_6;
-    uint8_t data;
-    while (1)
-    {
-        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-        while (!rb_c_empty(uart->ring_ptr))
-        {
-            rb_c_pop(uart->ring_ptr, &data);
-            upc_decode(data, &uart->rev_status);
-        }
-    }
-}
-
-static void UART_7_TxTask(const void *arg)
-{
-    UART_STRUCT *uart = &UART_7;
-    uint8_t data;
-    while (1)
-    {
-        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-        while (!rb_c_empty(uart->ring_ptr))
-        {
-            rb_c_pop(uart->ring_ptr, &data);
-            upc_decode(data, &uart->rev_status);
-        }
-    }
-}
-
-static void UART_2_TxTask(const void *arg)
-{
-    UART_STRUCT *uart = &UART_2;
-    uint8_t data;
-    while (1)
-    {
-        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-        while (!rb_c_empty(uart->ring_ptr))
-        {
-            rb_c_pop(uart->ring_ptr, &data);
-            upc_decode(data, &uart->rev_status);
-        }
-    }
-}
-
-void UART_init_list()
-{
-
-    UART_init(&UART_1);
-    UART_init(&UART_2);
-    UART_init(&UART_3);
-    UART_init(&UART_4);
-    UART_init(&UART_5);
-    UART_init(&UART_6);
-    UART_init(&UART_7);
-}
