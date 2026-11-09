@@ -23,7 +23,7 @@ void rec_status_init(rec_status_t *rec)
     if (rec == NULL)
         return;
 
-    rec->status          = header;   /* 初始期待的字段，一般传“期待帧头”那个枚举值 */
+    rec->status          = header;  
     rec->data_length     = 0;
     rec->cmd_id          = 0;
     rec->data_length_ptr = 0;
@@ -100,11 +100,8 @@ void cmd_function(rec_status_t *cb)
     uint8_t *data = &cb->data[7];
     char data_out[30];
     char data_buffer[30];
-    memset(data_out, 0, 30);
     memset(data_buffer, 0, 30);
-    CMD_PackPacket(data, 13, 0x103, data_buffer);
-    UART_Tx((UART_STRUCT*)cb->father_node, data_buffer, 13+9);
-    return;
+
     switch ((upc_cmd_t)cb->cmd_id)
     {
         /////////////////////////////////////////////////////////////////////////////////////// NUC
@@ -172,7 +169,7 @@ void cmd_function(rec_status_t *cb)
         ////////////////////////////////////////////////////////////////////////////////////// 底盘
     case Chassis_Status:
     {
-        OnlineStatusUpdate(CHASSIS_CB);
+        OnlineStatusUpdate(CHASSIS_CB);//这个应该没正常初始化
 
         if (GET_BIT(data[0], 0))
             OnlineStatusUpdate(CHASSIS_MOTOR_0);
@@ -191,7 +188,7 @@ void cmd_function(rec_status_t *cb)
         OnlineStatusUpdate(CHASSIS_CB);
 
         if (data[0])
-            osMessagePut(Main_Mailbox_Hdl, (uint32_t)Chassis_CB_Receive_OFF, 0);
+            osMessagePut(Main_Mailbox_Hdl, (uint32_t)Chassis_CB_Receive_OFF, 0);//这个应该没正常初始化
         else
             osMessagePut(Main_Mailbox_Hdl, (uint32_t)Chassis_CB_Receive_ON, 0);
     }
